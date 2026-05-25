@@ -144,8 +144,8 @@ Esto levanta tres servicios:
 ### 4. Ejecutar migraciones y seeders
 
 ```bash
-docker compose exec app php artisan migrate --force --seed
-```
+docker compose exec app chown -R www-data:www-data /var/www/storage && \
+docker compose exec -u www-data app php artisan migrate --force --seed
 
 La base de datos SQLite se crea automáticamente dentro del volumen persistente `kosmos-storage`. Los seeders cargan datos de demostración (vehículos, conductores, viajes, mantenimientos, registros de combustible).
 
@@ -326,7 +326,8 @@ Antes de desplegar a producción:
 ```bash
 APP_ENV=production docker compose build
 docker compose up -d
-docker compose exec app php artisan migrate --force --seed
+docker compose exec app chown -R www-data:www-data /var/www/storage
+docker compose exec -u www-data app php artisan migrate --force --seed
 docker compose exec app php artisan optimize
 ```
 
@@ -367,7 +368,8 @@ docker compose exec app php artisan storage:link
 docker compose down -v           # Elimina volúmenes (incluye BD)
 docker compose build --no-cache  # Reconstruye sin caché
 docker compose up -d
-docker compose exec app php artisan migrate --force --seed
+docker compose exec app chown -R www-data:www-data /var/www/storage
+docker compose exec -u www-data app php artisan migrate --force --seed
 ```
 
 ### Resetear base de datos
