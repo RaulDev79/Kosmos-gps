@@ -4,7 +4,6 @@ Sistema de gestión de flotillas (fleet management) con control de vehículos, c
 
 Desarrollado con **Laravel 13.x**, **Livewire 4**, **Flux UI 2** y **Tailwind CSS 4**.
 
-![Dashboard](img-github/dashboard.png)
 
 ---
 
@@ -24,7 +23,22 @@ Desarrollado con **Laravel 13.x**, **Livewire 4**, **Flux UI 2** y **Tailwind CS
 
 ## Módulos del sistema
 
+### Login (`/login`)
+
+![Inicio de Sesion](img-github/login.png)
+
+Pantalla de autenticación que gestiona el acceso al sistema:
+
+- **Login**: inicio de sesión con email y contraseña
+- **Registro**: creación de cuenta nueva con validación
+- **Recuperación de contraseña**: enlace enviado por correo para restablecer acceso
+- **Verificación de email**: confirmación de cuenta mediante enlace
+- **Autenticación de dos factores (2FA)**: seguridad adicional opcional
+
+
 ### Dashboard (`/dashboard`)
+
+![Dashboard](img-github/dashboard.png)
 
 Panel analítico con visión general de la flotilla:
 
@@ -98,6 +112,18 @@ CRUD completo para el registro de carga de combustible:
 - Seguridad: cambiar contraseña con confirmación
 - Apariencia: selector de tema (claro, oscuro, sistema)
 
+### Servidor de correo ficticio (MailHog)
+
+![MailHog](img-github/server-mail.png)
+
+MailHog captura todos los correos enviados por la aplicación sin enviarlos realmente, ideal para desarrollo:
+
+- **Verificación de email**: confirmar registro
+- **Restablecimiento de contraseña**: enlace de recuperación
+- **Notificaciones**: cualquier correo transaccional
+
+Interfaz web disponible en `http://localhost:18025`.
+
 ### Diagrama de base de datos
 
 ![Relaciones BD](img-github/relaciones-db.png)
@@ -113,6 +139,14 @@ CRUD completo para el registro de carga de combustible:
 ---
 
 ## Inicio rápido
+
+Puedes seguir los pasos manuales a continuación o usar el script automatizado:
+
+```bash
+bash bin/setup.sh
+```
+
+### Manual paso a paso
 
 ### 1. Clonar el repositorio
 

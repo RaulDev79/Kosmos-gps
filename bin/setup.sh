@@ -4,26 +4,29 @@ set -e
 echo "=== Kosmos GPS - Docker Setup ==="
 
 echo ""
-echo "1. Building Docker images..."
+echo "1. Construyendo imágenes Docker..."
 docker compose build
 
 echo ""
-echo "2. Starting containers..."
+echo "2. Iniciando contenedores..."
 docker compose up -d
 
 echo ""
-echo "3. Generating application key..."
-docker compose exec app php artisan key:generate --ansi
+echo "   Esperando a que el contenedor app esté listo..."
+until docker compose exec app php -v > /dev/null 2>&1; do
+  sleep 1
+done
 
 echo ""
-echo "4. Running database migrations..."
-docker compose exec app php artisan migrate --force
+echo "3. Corrigiendo permisos y ejecutando migraciones + seeders..."
+docker compose exec app chown -R www-data:www-data /var/www/storage
+docker compose exec -u www-data app php artisan migrate --force --seed
 
 echo ""
-echo "=== Setup complete ==="
-echo "App running at: http://localhost:${APP_PORT:-8080}"
+echo "=== Setup completo ==="
+echo "App corriendo en: http://localhost:${APP_PORT:-18080}"
 echo ""
-echo "Useful commands:"
-echo "  docker compose logs -f app    # Follow app logs"
-echo "  docker compose exec app bash  # Open shell in app container"
-echo "  docker compose down           # Stop all services"
+echo "Comandos útiles:"
+echo "  docker compose logs -f app    # Ver logs de la aplicación"
+echo "  docker compose exec app bash  # Abrir shell en el contenedor app"
+echo "  docker compose down           # Detener todos los servicios"
