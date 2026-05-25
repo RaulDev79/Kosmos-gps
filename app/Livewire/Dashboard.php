@@ -6,6 +6,7 @@ use App\Models\Mantenimiento;
 use App\Models\RegistroCombustible;
 use App\Models\Vehiculo;
 use App\Models\Viaje;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 
@@ -18,8 +19,11 @@ class Dashboard extends Component
     // vehiculoId: filtro opcional por vehículo
     // groupBy: criterio temporal para agrupar la serie de viajes
     public $startDate = '';
+
     public $endDate = '';
+
     public $vehiculoId = '';
+
     public $groupBy = 'month';
 
     // =========================================================================
@@ -27,15 +31,25 @@ class Dashboard extends Component
     // =========================================================================
     // Estas propiedades alimentan cards, gráfico de barras y gráfico circular
     public $totalViajes = ['count' => 0, 'km' => 0];
+
     public $totalCombustible = ['costo' => 0, 'litros' => 0];
+
     public $totalMantenimientos = ['count' => 0, 'costo' => 0];
+
     public $porcentajeCompletados = 0;
+
     public $costoPorKm = 0;
+
     public $mantenimientosPendientes = 0;
+
     public $viajesPorPeriodo = ['series' => [], 'max' => 0];
+
     public $kmPorVehiculo = ['items' => []];
+
     public $pieGradient = 'conic-gradient(#d4d4d8 0% 100%)';
+
     public $chartLabel = '';
+
     public $step = 1;
 
     // =========================================================================
@@ -204,7 +218,7 @@ class Dashboard extends Component
     /**
      * buildViajesPorPeriodo() - Genera la serie temporal del gráfico de barras
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Consulta base de viajes
+     * @param  Builder  $query  Consulta base de viajes
      */
     protected function buildViajesPorPeriodo($query): void
     {
@@ -227,8 +241,8 @@ class Dashboard extends Component
         } elseif ($this->groupBy === 'week') {
             // Agrupa por semana ISO dentro del año
             $series = $query
-                ->selectRaw('YEAR(fecha_hora_inicio) as year_number')
-                ->selectRaw('WEEK(fecha_hora_inicio, 1) as week_number')
+                ->selectRaw("CAST(strftime('%Y', fecha_hora_inicio) AS INTEGER) as year_number")
+                ->selectRaw("CAST(strftime('%W', fecha_hora_inicio) AS INTEGER) as week_number")
                 ->selectRaw('MIN(DATE(fecha_hora_inicio)) as period_start')
                 ->selectRaw('COUNT(*) as total')
                 ->groupBy('year_number', 'week_number')
@@ -237,15 +251,15 @@ class Dashboard extends Component
                 ->get()
                 ->map(function ($row) {
                     return [
-                        'label' => 'Sem ' . $row->week_number,
+                        'label' => 'Sem '.$row->week_number,
                         'total' => (int) $row->total,
                     ];
                 });
         } else {
             // Agrupa por mes
             $series = $query
-                ->selectRaw('YEAR(fecha_hora_inicio) as year_number')
-                ->selectRaw('MONTH(fecha_hora_inicio) as month_number')
+                ->selectRaw("CAST(strftime('%Y', fecha_hora_inicio) AS INTEGER) as year_number")
+                ->selectRaw("CAST(strftime('%m', fecha_hora_inicio) AS INTEGER) as month_number")
                 ->selectRaw('COUNT(*) as total')
                 ->groupBy('year_number', 'month_number')
                 ->orderBy('year_number')
@@ -274,7 +288,7 @@ class Dashboard extends Component
     /**
      * buildKmPorVehiculo() - Calcula la distribución porcentual de kilómetros
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Consulta base de viajes
+     * @param  Builder  $query  Consulta base de viajes
      */
     protected function buildKmPorVehiculo($query): void
     {
@@ -295,8 +309,8 @@ class Dashboard extends Component
         $items = $rows->values()->map(function ($row, $index) use ($colors, $totalKm) {
             $vehiculo = $row->vehiculo;
             $label = $vehiculo
-                ? trim($vehiculo->placa . ' (' . $vehiculo->marca . ')')
-                : 'Vehículo #' . $row->vehiculo_id;
+                ? trim($vehiculo->placa.' ('.$vehiculo->marca.')')
+                : 'Vehículo #'.$row->vehiculo_id;
 
             return [
                 'label' => $label,
@@ -312,7 +326,7 @@ class Dashboard extends Component
     /**
      * buildPieGradient() - Construye el CSS del gráfico circular
      *
-     * @param array $items Segmentos con color y porcentaje
+     * @param  array  $items  Segmentos con color y porcentaje
      */
     protected function buildPieGradient(array $items): string
     {
@@ -329,7 +343,7 @@ class Dashboard extends Component
             $start = $end;
         }
 
-        return 'conic-gradient(' . implode(', ', $segments) . ')';
+        return 'conic-gradient('.implode(', ', $segments).')';
     }
 
     /**
@@ -343,15 +357,15 @@ class Dashboard extends Component
             'month' => 'Viajes por mes',
         ];
 
-        return ($labels[$this->groupBy] ?? 'Viajes por período') . ' - ' .
-            Carbon::parse($this->startDate)->format('d/m/Y') . ' a ' .
+        return ($labels[$this->groupBy] ?? 'Viajes por período').' - '.
+            Carbon::parse($this->startDate)->format('d/m/Y').' a '.
             Carbon::parse($this->endDate)->format('d/m/Y');
     }
 
     /**
      * calculateChartStep() - Decide cada cuántas etiquetas mostrar en el eje X
      *
-     * @param int $count Cantidad de puntos de la serie
+     * @param  int  $count  Cantidad de puntos de la serie
      */
     protected function calculateChartStep(int $count): int
     {

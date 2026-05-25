@@ -1,0 +1,14 @@
+.git
+.gitattributes
+.gitignore
+.github
+.env
+vendor/
+node_modules/
+storage/framework/cache/data/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/
+storage/debugbar/
+storage/pail/
+*/.gitkeep
